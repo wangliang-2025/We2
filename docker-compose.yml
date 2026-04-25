@@ -1,0 +1,51 @@
+# 双容器：Web (Next.js + SQLite + 图床) + Caddy (HTTPS)
+# 使用前先填好 .env
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: love-web
+    restart: unless-stopped
+    expose:
+      - "3000"
+    volumes:
+      - love-data:/data       # 数据库 + 上传图片
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
+      - AI_PROVIDER=${AI_PROVIDER:-}
+      - AI_API_KEY=${AI_API_KEY:-}
+      - AI_BASE_URL=${AI_BASE_URL:-}
+      - AI_MODEL=${AI_MODEL:-}
+    networks:
+      - love-net
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: love-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      - DOMAIN=${DOMAIN:-localhost}
+      - ACME_EMAIL=${ACME_EMAIL:-admin@example.com}
+    depends_on:
+      - web
+    networks:
+      - love-net
+
+networks:
+  love-net:
+    driver: bridge
+
+volumes:
+  love-data:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,208 @@
+// 数据库模型 - SQLite（单文件、零运维）
+// 同时兼容 PostgreSQL（生产想升级时改 datasource provider 即可）
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// 情侣空间 - 一个 Couple = 一对小屋的所有数据
+model Couple {
+  id         String   @id @default(cuid())
+  inviteCode String   @unique
+  startDate  String
+  cityA      String
+  cityB      String
+  secret     String?
+  createdAt  DateTime @default(now())
+
+  users         User[]
+  photos        Photo[]
+  diaries       Diary[]
+  messages      Message[]
+  bottles       Bottle[]
+  anniversaries Anniversary[]
+  wishes        Wish[]
+  places        Place[]
+  moods         Mood[]
+  complaints    Complaint[]
+}
+
+// 用户 - 每个 Couple 最多 2 个 User
+model User {
+  id              String   @id @default(cuid())
+  coupleId        String
+  role            String   // "you" or "them" - 第一个注册的是 you，加入的是 them
+  email           String   @unique
+  passwordHash    String
+  name            String
+  avatar          String   @default("🐰")
+  status          String   @default("sunny")
+  statusText      String?
+  statusUpdatedAt DateTime?
+  createdAt       DateTime @default(now())
+
+  // ===== 通知配置 =====
+  serverChanKey  String?  // Server酱 SendKey（推送到微信）
+  enabledNotifs  String?  // JSON: {message:true, complaint:true, hammer:true, apology:true, diary:true, photo:true, anniversary:true}
+  wechatBindUrl  String?  // 预留：企业微信 webhook 等
+
+  couple     Couple      @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+  photos     Photo[]
+  diaries    Diary[]
+  messages   Message[]
+  bottles    Bottle[]
+  complaints Complaint[]
+
+  @@index([coupleId])
+}
+
+// 相册
+model Photo {
+  id        String   @id @default(cuid())
+  coupleId  String
+  authorId  String
+  url       String   // /uploads/{coupleId}/{filename}.webp
+  thumbnail String?
+  caption   String?
+  location  String?
+  tags      String?  // JSON array string
+  createdAt DateTime @default(now())
+
+  couple Couple @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+  author User   @relation(fields: [authorId], references: [id])
+
+  @@index([coupleId, createdAt])
+}
+
+// 日记
+model Diary {
+  id        String   @id @default(cuid())
+  coupleId  String
+  authorId  String
+  title     String
+  content   String
+  mood      Int      // 1-5
+  weather   String?
+  privacy   String   // "public" | "private" | "capsule"
+  unlockAt  String?
+  createdAt DateTime @default(now())
+
+  couple Couple @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+  author User   @relation(fields: [authorId], references: [id])
+
+  @@index([coupleId, createdAt])
+}
+
+// 聊天消息
+model Message {
+  id              String   @id @default(cuid())
+  coupleId        String
+  authorId        String
+  text            String
+  type            String   @default("text") // "text" | "interaction"
+  interactionType String?  // "poke" | "hug" | "kiss" | "pat"
+  createdAt       DateTime @default(now())
+
+  couple Couple @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+  author User   @relation(fields: [authorId], references: [id])
+
+  @@index([coupleId, createdAt])
+}
+
+// 漂流瓶
+model Bottle {
+  id        String    @id @default(cuid())
+  coupleId  String
+  authorId  String
+  text      String
+  pickedAt  DateTime?
+  createdAt DateTime  @default(now())
+
+  couple Couple @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+  author User   @relation(fields: [authorId], references: [id])
+
+  @@index([coupleId])
+}
+
+// 纪念日
+model Anniversary {
+  id       String  @id @default(cuid())
+  coupleId String
+  name     String
+  date     String
+  repeat   Boolean @default(true)
+  emoji    String?
+
+  couple Couple @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+
+  @@index([coupleId])
+}
+
+// 心愿
+model Wish {
+  id        String   @id @default(cuid())
+  coupleId  String
+  text      String
+  category  String   // "travel" | "food" | "experience" | "life" | "longterm"
+  done      Boolean  @default(false)
+  doneAt    DateTime?
+  photo     String?
+  createdAt DateTime @default(now())
+
+  couple Couple @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+
+  @@index([coupleId])
+}
+
+// 地点
+model Place {
+  id        String  @id @default(cuid())
+  coupleId  String
+  name      String
+  type      String  // "visited" | "wishlist"
+  notes     String?
+  visitDate String?
+  emoji     String?
+
+  couple Couple @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+
+  @@index([coupleId])
+}
+
+// 心情日历
+model Mood {
+  id         String  @id @default(cuid())
+  coupleId   String
+  date       String
+  yourMood   Int?
+  theirMood  Int?
+  note       String?
+
+  couple Couple @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+
+  @@unique([coupleId, date])
+}
+
+// 吐槽
+model Complaint {
+  id           String    @id @default(cuid())
+  coupleId     String
+  authorId     String
+  category     String    // "small" | "big" | "cute"
+  content      String
+  hammered     Int       @default(0)
+  apologized   Boolean   @default(false)
+  apology      String?
+  apologizedAt DateTime?
+  createdAt    DateTime  @default(now())
+
+  couple Couple @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+  author User   @relation(fields: [authorId], references: [id])
+
+  @@index([coupleId, createdAt])
+}

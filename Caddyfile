@@ -1,0 +1,52 @@
+# Caddyfile - 自动 HTTPS + 反向代理 + 安全加固
+# 用法：把当前文件放在 docker-compose.yml 同级，启动后 Caddy 会自动申请 HTTPS 证书
+
+{
+	email {$ACME_EMAIL:admin@example.com}
+	admin off
+}
+
+{$DOMAIN} {
+	encode gzip zstd
+
+	# 反代到 Next.js 容器
+	reverse_proxy web:3000 {
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+
+	# === 安全头 ===
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Frame-Options "DENY"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "geolocation=(), camera=(), microphone=(), payment=()"
+		X-Robots-Tag "noindex, nofollow, noarchive, nosnippet"
+		-Server
+		-X-Powered-By
+	}
+
+	# === 拒绝爬虫扫描 ===
+	respond /robots.txt 200 {
+		body "User-agent: *
+Disallow: /"
+		close
+	}
+
+	# ==================================================================
+	# === 【可选】双层密码保护：取消下面 5 行的注释即可启用 ===
+	# === 启用后，访问网站会先弹出浏览器原生密码框 ===
+	# === 密码哈希用：docker run --rm caddy:2-alpine caddy hash-password ===
+	# ==================================================================
+	#
+	# basic_auth {
+	#   你的用户名 $2a$14$替换成你生成的哈希值
+	# }
+
+	log {
+		output stderr
+		level WARN
+	}
+}
