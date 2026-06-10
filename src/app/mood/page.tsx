@@ -54,11 +54,13 @@ export default function MoodPage() {
   const selectedEntry = moodMap[selected];
 
   const setMood = (who: "yourMood" | "theirMood", val: 1 | 2 | 3 | 4 | 5) => {
-    store.moods.set(selected, { [who]: val });
+    const date = selected;
+    store.moods.set(date, { [who]: val });
   };
 
   const setNote = (note: string) => {
-    store.moods.set(selected, { note });
+    const date = selected;
+    store.moods.set(date, { note });
   };
 
   const goPrev = () => {

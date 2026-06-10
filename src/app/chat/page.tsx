@@ -24,17 +24,27 @@ export default function ChatPage() {
   const [showBottle, setShowBottle] = useState(false);
   const [pickedBottle, setPickedBottle] = useState<Bottle | null>(null);
   const [floatHeart, setFloatHeart] = useState<{ emoji: string; id: number } | null>(null);
+  const floatTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const floatIdRef = useRef(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const refresh = () => setMessages(store.messages.list());
     refresh();
     window.addEventListener("ld:storage", refresh);
-    return () => window.removeEventListener("ld:storage", refresh);
+    return () => {
+      window.removeEventListener("ld:storage", refresh);
+      if (floatTimerRef.current) clearTimeout(floatTimerRef.current);
+    };
   }, []);
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    const el = scrollRef.current;
+    if (!el) return;
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 100;
+    if (nearBottom) {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    }
   }, [messages]);
 
   const send = () => {
@@ -49,8 +59,10 @@ export default function ChatPage() {
       type: "interaction",
       interactionType: i.type,
     });
-    setFloatHeart({ emoji: i.emoji, id: Date.now() });
-    setTimeout(() => setFloatHeart(null), 1500);
+    floatIdRef.current += 1;
+    setFloatHeart({ emoji: i.emoji, id: floatIdRef.current });
+    if (floatTimerRef.current) clearTimeout(floatTimerRef.current);
+    floatTimerRef.current = setTimeout(() => setFloatHeart(null), 1500);
     if (typeof window !== "undefined" && "vibrate" in navigator) navigator.vibrate?.(50);
   };
 

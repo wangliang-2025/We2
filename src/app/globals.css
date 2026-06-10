@@ -227,6 +227,7 @@ body {
 
   /* 渐变文字 */
   .text-gradient {
+    color: #ff8fa3;
     background: linear-gradient(135deg, #ff8fa3 0%, #d8c4ff 50%, #b8dcff 100%);
     -webkit-background-clip: text;
     background-clip: text;
@@ -234,6 +235,7 @@ body {
   }
 
   .text-gradient-warm {
+    color: #ff8fa3;
     background: linear-gradient(135deg, #ff8fa3 0%, #ffd4b8 100%);
     -webkit-background-clip: text;
     background-clip: text;
@@ -251,6 +253,10 @@ body {
   }
 
   /* 滚动条 */
+  html {
+    scrollbar-color: rgba(255, 143, 163, 0.3) transparent;
+    scrollbar-width: thin;
+  }
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;

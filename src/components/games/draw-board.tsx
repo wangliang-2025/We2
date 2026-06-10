@@ -28,13 +28,15 @@ export function DrawBoard() {
     const dpr = window.devicePixelRatio || 1;
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
-      const tmp = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const saved = canvas.toDataURL();
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
       ctx.scale(dpr, dpr);
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
-      try { ctx.putImageData(tmp, 0, 0); } catch {}
+      const img = new Image();
+      img.onload = () => ctx.drawImage(img, 0, 0);
+      img.src = saved;
     };
     resize();
     window.addEventListener("resize", resize);

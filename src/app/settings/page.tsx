@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { GlassCard } from "@/components/ui/glass-card";
@@ -17,35 +17,45 @@ export default function SettingsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [saved, setSaved] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const copiedTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     const refresh = () => setProfile(store.profile.get());
     refresh();
     window.addEventListener("ld:storage", refresh);
-    return () => window.removeEventListener("ld:storage", refresh);
+    return () => {
+      window.removeEventListener("ld:storage", refresh);
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+      if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+    };
   }, []);
 
   const logout = async () => {
     if (!confirm("确定要退出登录吗？")) return;
-    await api.logout();
+    try { await api.logout(); } catch {}
     router.replace("/login");
   };
 
   const copyCode = async () => {
     if (!profile?.inviteCode) return;
-    await navigator.clipboard.writeText(profile.inviteCode);
+    try { await navigator.clipboard.writeText(profile.inviteCode); } catch { return; }
     setCopiedCode(true);
-    setTimeout(() => setCopiedCode(false), 1500);
+    if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
+    copiedTimerRef.current = setTimeout(() => setCopiedCode(false), 1500);
   };
 
   if (!profile) return null;
 
   const update = (patch: Partial<Profile>) => {
-    const next = { ...profile, ...patch };
-    setProfile(next);
+    setProfile((prev) => {
+      if (!prev) return prev;
+      return { ...prev, ...patch };
+    });
     store.profile.set(patch);
     setSaved(true);
-    setTimeout(() => setSaved(false), 1200);
+    if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+    savedTimerRef.current = setTimeout(() => setSaved(false), 1200);
   };
 
   return (
@@ -278,14 +288,16 @@ function NotificationSection() {
   const [savedHint, setSavedHint] = useState(false);
 
   useEffect(() => {
-    // 加载当前配置
+    let cancelled = false;
     (async () => {
       try {
         const me = await api.me();
+        if (cancelled) return;
         setServerChanKey(me.me.serverChanKey || "");
         if (me.me.enabledNotifs) {
           try {
             const e = JSON.parse(me.me.enabledNotifs);
+            if (cancelled) return;
             setEnabled((prev) => ({ ...prev, ...e }));
           } catch {}
         }
@@ -294,6 +306,7 @@ function NotificationSection() {
     if (typeof window !== "undefined" && "Notification" in window) {
       setBrowserPerm(Notification.permission);
     }
+    return () => { cancelled = true; };
   }, []);
 
   const requestBrowserPerm = async () => {
@@ -312,15 +325,17 @@ function NotificationSection() {
   };
 
   const saveServerChan = async () => {
-    await api.patchProfile({ serverChanKey: serverChanKey.trim() || null });
+    try { await api.patchProfile({ serverChanKey: serverChanKey.trim() || null }); } catch {}
     setSavedHint(true);
     setTimeout(() => setSavedHint(false), 1500);
   };
 
   const toggleType = (type: NotifType, v: boolean) => {
-    const next = { ...enabled, [type]: v };
-    setEnabled(next);
-    api.patchProfile({ enabledNotifs: JSON.stringify(next) }).catch(() => {});
+    setEnabled((prev) => {
+      const next = { ...prev, [type]: v };
+      api.patchProfile({ enabledNotifs: JSON.stringify(next) }).catch(() => {});
+      return next;
+    });
   };
 
   const sendTest = async () => {

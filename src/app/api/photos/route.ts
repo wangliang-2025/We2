@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
-import { apiHandler, requireUser } from "@/lib/auth";
+import { apiHandler, requireUser, ApiError } from "@/lib/auth";
 import { publish } from "@/lib/event-bus";
 import { sendNotificationToPartner } from "@/lib/notify";
 
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   return apiHandler(async () => {
     const me = await requireUser();
     const { url, thumbnail, caption, location } = await req.json();
-    if (!url) throw new Error("缺少 url");
+    if (!url) throw new ApiError(400, "缺少 url");
     const photo = await prisma.photo.create({
       data: {
         coupleId: me.coupleId,

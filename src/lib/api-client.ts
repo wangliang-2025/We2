@@ -5,12 +5,13 @@ async function request<T>(
   path: string,
   opts: RequestInit = {}
 ): Promise<T> {
+  const headers: Record<string, string> = { ...(opts.headers as Record<string, string> || {}) };
+  if (opts.method && opts.method !== "GET") {
+    headers["Content-Type"] = "application/json";
+  }
   const res = await fetch(path, {
     credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...(opts.headers || {}),
-    },
+    headers,
     ...opts,
   });
   const json: ApiResp<T> = await res.json();
@@ -119,6 +120,7 @@ export const api = {
     request<unknown[]>("/api/messages" + (since ? `?since=${encodeURIComponent(since)}` : "")),
   addMessage: (data: Record<string, unknown>) =>
     request<unknown>("/api/messages", { method: "POST", body: JSON.stringify(data) }),
+  clearMessages: () => request<unknown>("/api/messages", { method: "DELETE" }),
 
   // ===== Bottles =====
   addBottle: (text: string) =>

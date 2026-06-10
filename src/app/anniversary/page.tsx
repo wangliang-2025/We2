@@ -14,7 +14,8 @@ const presetEmojis = ["💝", "🎂", "💍", "🌹", "🎉", "💖", "🍰", "�
 function nextOccurrence(a: Anniversary): Date {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const orig = new Date(a.date);
+  const parts = a.date.split("-").map(Number);
+  const orig = new Date(parts[0], (parts[1] || 1) - 1, parts[2] || 1);
   if (!a.repeat) return orig;
   const next = new Date(today.getFullYear(), orig.getMonth(), orig.getDate());
   if (next.getTime() < today.getTime()) {
@@ -45,7 +46,9 @@ export default function AnniversaryPage() {
     .map((a) => ({ ...a, _next: nextOccurrence(a), _days: daysBetween(nextOccurrence(a)) }))
     .sort((a, b) => a._next.getTime() - b._next.getTime());
 
-  const remove = (id: string) => store.anniversaries.remove(id);
+  const remove = (id: string) => {
+    if (confirm(t("anniversary.deleteConfirm"))) store.anniversaries.remove(id);
+  };
 
   return (
     <div className="space-y-5 animate-fade-up">

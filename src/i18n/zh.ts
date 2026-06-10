@@ -147,6 +147,7 @@ export const zh = {
     save: "保存",
     cancel: "取消",
     empty: "添加你们的第一个纪念日吧",
+    deleteConfirm: "确定要删除这个纪念日吗？",
     presets: "快速添加",
     presetMet: "第一次见面",
     presetTogether: "确定关系",

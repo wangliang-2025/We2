@@ -276,7 +276,9 @@ export const store = {
         userPatch.statusText = p.yourStatusText || null;
         if (cache.me) cache.me.statusText = p.yourStatusText || null;
       }
-      if ("theirName" in p && p.theirName !== undefined) couplePatch.theirName = p.theirName; // 不允许改对方名字，忽略
+      if ("theirName" in p && p.theirName !== undefined) {
+        // 对方名字只能由对方自己改，此处忽略
+      }
       if ("startDate" in p && p.startDate !== undefined) {
         couplePatch.startDate = p.startDate;
         cache.startDate = p.startDate;
@@ -381,6 +383,7 @@ export const store = {
     clear: () => {
       cache.messages = [];
       emit();
+      withSync(() => api.clearMessages());
     },
   },
 

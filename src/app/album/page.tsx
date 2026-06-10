@@ -31,7 +31,7 @@ export default function AlbumPage() {
     if (!files) return;
     const list = Array.from(files).filter((f) => f.type.startsWith("image/"));
     if (list.length === 0) return;
-    setUploading(list.length);
+    setUploading((prev) => prev + list.length);
     for (const file of list) {
       try {
         const result = await api.uploadImage(file);
@@ -43,7 +43,7 @@ export default function AlbumPage() {
       } catch (err) {
         alert(`上传失败：${err instanceof Error ? err.message : err}`);
       } finally {
-        setUploading((n) => n - 1);
+        setUploading((n) => Math.max(0, n - 1));
       }
     }
   };
@@ -280,7 +280,9 @@ function Lightbox({
   const [location, setLocation] = useState(photo.location || "");
 
   const save = () => {
-    store.photos.update(photo.id, { caption, location });
+    if (caption.trim() || location.trim()) {
+      store.photos.update(photo.id, { caption: caption.trim(), location: location.trim() });
+    }
     onClose();
   };
 

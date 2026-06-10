@@ -10,7 +10,7 @@ import {
 
 export async function POST(req: NextRequest) {
   return apiHandler(async () => {
-    const { email, password, name, theirName, startDate, cityA, cityB } = await req.json();
+    const { email, password, name, startDate, cityA, cityB } = await req.json();
 
     if (!email || !password || !name) {
       throw new ApiError(400, "邮箱、密码、昵称必填");

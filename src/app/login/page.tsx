@@ -22,7 +22,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await api.login(email.trim(), password);
-      await hydrateFromServer();
+      try { await hydrateFromServer(); } catch {}
       router.replace("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "登录失败");

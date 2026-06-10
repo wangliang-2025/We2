@@ -8,15 +8,13 @@ import { store, type Complaint, type Profile } from "@/lib/storage";
 import { api } from "@/lib/api-client";
 import { formatDate, cn } from "@/lib/utils";
 import {
-  Hammer,
   Megaphone,
   Plus,
   Trash2,
   X,
   Heart,
   HandHeart,
-  MessageCircleHeart,
-  Frown,
+  Hammer,
   Sparkles,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -43,6 +41,7 @@ export default function ComplaintPage() {
   const [showNew, setShowNew] = useState(false);
   const [tab, setTab] = useState<"all" | "open" | "resolved">("all");
   const [hammerEvent, setHammerEvent] = useState<{ id: string; rect: DOMRect } | null>(null);
+  const hammerTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     const refresh = () => {
@@ -51,7 +50,10 @@ export default function ComplaintPage() {
     };
     refresh();
     window.addEventListener("ld:storage", refresh);
-    return () => window.removeEventListener("ld:storage", refresh);
+    return () => {
+      window.removeEventListener("ld:storage", refresh);
+      if (hammerTimerRef.current) clearTimeout(hammerTimerRef.current);
+    };
   }, []);
 
   const filtered =
@@ -70,7 +72,8 @@ export default function ComplaintPage() {
     if (typeof window !== "undefined" && "vibrate" in navigator) {
       navigator.vibrate?.([50, 30, 80]);
     }
-    setTimeout(() => setHammerEvent(null), 1100);
+    if (hammerTimerRef.current) clearTimeout(hammerTimerRef.current);
+    hammerTimerRef.current = setTimeout(() => setHammerEvent(null), 1100);
   };
 
   return (
@@ -204,10 +207,10 @@ function ComplaintCard({
   const cardRef = useRef<HTMLDivElement>(null);
 
   const isMine = c.authorId === store.myId();
-  const accuser = isMine ? profile?.yourName : profile?.theirName;
-  const accuserAvatar = isMine ? profile?.yourAvatar : profile?.theirAvatar;
-  const targetAvatar = isMine ? profile?.theirAvatar : profile?.yourAvatar;
-  const targetName = isMine ? profile?.theirName : profile?.yourName;
+  const accuser = isMine ? profile?.yourName || "我" : profile?.theirName || "TA";
+  const accuserAvatar = isMine ? profile?.yourAvatar || "🐰" : profile?.theirAvatar || "🦁";
+  const targetAvatar = isMine ? profile?.theirAvatar || "🦁" : profile?.yourAvatar || "🐰";
+  const targetName = isMine ? profile?.theirName || "TA" : profile?.yourName || "我";
 
   const handleHammer = () => {
     if (!cardRef.current) return;

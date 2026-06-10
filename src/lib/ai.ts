@@ -65,8 +65,8 @@ export async function chatComplete(messages: ChatMessage[], opts: { temperature?
     }
 
     const json = await res.json();
-    const content = json.choices?.[0]?.message?.content?.trim() || "";
-    return { ok: true as const, content };
+    const content = json.choices?.[0]?.message?.content?.trim();
+    return { ok: true as const, content: content || "" };
   } catch (e) {
     return { ok: false as const, error: e instanceof Error ? e.message : "Unknown error" };
   }
@@ -100,7 +100,7 @@ export async function generateAILoveQuote(
     { role: "user", content: locale === "zh" ? "写一句情话" : "Write one love line" },
   ], { temperature: 1.0, maxTokens: 100 });
 
-  if (!result.ok) {
+  if (!result.ok || !result.content) {
     return { source: "local", content: generateLoveQuote(theirName, locale) };
   }
   return { source: "ai", content: result.content };

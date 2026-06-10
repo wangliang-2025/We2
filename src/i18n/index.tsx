@@ -30,12 +30,13 @@ function getByPath(obj: any, path: string): string {
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>("zh");
-
-  useEffect(() => {
-    const saved = (typeof window !== "undefined" && localStorage.getItem("locale")) as Locale | null;
-    if (saved === "zh" || saved === "en") setLocaleState(saved);
-  }, []);
+  const [locale, setLocaleState] = useState<Locale>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("locale");
+      if (saved === "zh" || saved === "en") return saved;
+    }
+    return "zh";
+  });
 
   const setLocale = useCallback((l: Locale) => {
     setLocaleState(l);

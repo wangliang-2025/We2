@@ -149,6 +149,7 @@ export const en: Dict = {
     save: "Save",
     cancel: "Cancel",
     empty: "Add your first anniversary",
+    deleteConfirm: "Delete this anniversary?",
     presets: "Quick add",
     presetMet: "First met",
     presetTogether: "Got together",

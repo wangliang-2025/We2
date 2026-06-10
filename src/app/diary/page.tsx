@@ -85,7 +85,7 @@ function DiaryCard({ d, index, onDelete }: { d: Diary; index: number; onDelete: 
         variant="strong"
         className={cn(
           "p-5 relative overflow-hidden bg-gradient-to-br",
-          moodColors[d.mood - 1]
+          d.mood >= 1 && d.mood <= 5 ? moodColors[d.mood - 1] : "from-gray-100 to-gray-200"
         )}
       >
         <div className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-20 -mt-10 -mr-10"
@@ -94,7 +94,7 @@ function DiaryCard({ d, index, onDelete }: { d: Diary; index: number; onDelete: 
         <div className="relative">
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-2xl">{moodEmojis[d.mood - 1]}</span>
+              <span className="text-2xl">{d.mood >= 1 && d.mood <= 5 ? moodEmojis[d.mood - 1] : "😐"}</span>
               {d.title && <h3 className="font-bold text-lg">{d.title}</h3>}
               <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-white/60 dark:bg-white/15 font-medium">
                 {d.privacy === "private" ? (

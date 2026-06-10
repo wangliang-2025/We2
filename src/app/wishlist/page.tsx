@@ -94,7 +94,7 @@ export default function WishlistPage() {
       ) : (
         <div className="space-y-2">
           {filtered.map((w, i) => {
-            const cat = categories.find((c) => c.id === w.category)!;
+            const cat = categories.find((c) => c.id === w.category) || categories[2];
             const Icon = cat.icon;
             return (
               <motion.div

@@ -47,3 +47,12 @@ export async function POST(req: NextRequest) {
     return msg;
   });
 }
+
+export async function DELETE() {
+  return apiHandler(async () => {
+    const me = await requireUser();
+    await prisma.message.deleteMany({ where: { coupleId: me.coupleId } });
+    publish(me.coupleId, { type: "sync", actorId: me.id });
+    return { ok: true };
+  });
+}

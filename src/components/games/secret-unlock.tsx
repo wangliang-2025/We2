@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GlassCard } from "@/components/ui/glass-card";
 import { useI18n } from "@/i18n";
 import { store } from "@/lib/storage";
@@ -14,16 +14,18 @@ export function SecretUnlock() {
   const [input, setInput] = useState("");
   const [unlocked, setUnlocked] = useState(false);
   const [shake, setShake] = useState(false);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
     setSecret(store.profile.get().secret || "");
+    return () => timersRef.current.forEach(clearTimeout);
   }, []);
 
   const tryUnlock = () => {
     if (!secret) return;
     if (input.trim() === secret.trim()) {
       setUnlocked(true);
-      burstHearts();
+      burstHearts(timersRef.current);
     } else {
       setShake(true);
       setTimeout(() => setShake(false), 500);
@@ -99,10 +101,10 @@ export function SecretUnlock() {
   );
 }
 
-function burstHearts() {
+function burstHearts(timers: ReturnType<typeof setTimeout>[]) {
   const colors = ["#FF8FA3", "#FFB6C1", "#D8C4FF", "#B8DCFF", "#FFD4B8"];
   for (let i = 0; i < 24; i++) {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       const el = document.createElement("div");
       el.textContent = "♥";
       el.style.cssText = `
@@ -125,5 +127,6 @@ function burstHearts() {
       });
       setTimeout(() => el.remove(), 2400);
     }, i * 30);
+    timers.push(timer);
   }
 }

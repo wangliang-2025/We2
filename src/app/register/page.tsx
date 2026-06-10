@@ -35,7 +35,11 @@ export default function RegisterPage() {
         cityA: cityA.trim() || undefined,
         cityB: cityB.trim() || undefined,
       });
-      setInviteCode(r.couple.inviteCode);
+      if (r?.couple?.inviteCode) {
+        setInviteCode(r.couple.inviteCode);
+      } else {
+        setError("注册成功但未获取到邀请码，请重试");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "注册失败");
     } finally {
@@ -44,13 +48,17 @@ export default function RegisterPage() {
   };
 
   const enter = async () => {
-    await hydrateFromServer();
-    router.replace("/");
+    try {
+      await hydrateFromServer();
+      router.replace("/");
+    } catch {
+      router.replace("/");
+    }
   };
 
   const copy = async () => {
     if (!inviteCode) return;
-    await navigator.clipboard.writeText(inviteCode);
+    try { await navigator.clipboard.writeText(inviteCode); } catch { return; }
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };

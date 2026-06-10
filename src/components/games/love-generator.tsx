@@ -36,7 +36,12 @@ export function LoveGenerator() {
     }
   };
   const copy = async () => {
-    await navigator.clipboard.writeText(quote);
+    if (!navigator?.clipboard?.writeText) return;
+    try {
+      await navigator.clipboard.writeText(quote);
+    } catch {
+      return;
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };

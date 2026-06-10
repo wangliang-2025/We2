@@ -29,7 +29,7 @@ export default function JoinPage() {
         password,
         name: name.trim(),
       });
-      await hydrateFromServer();
+      try { await hydrateFromServer(); } catch {}
       router.replace("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "加入失败");
