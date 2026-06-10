@@ -50,7 +50,7 @@ export function RecentMemories() {
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
           {items.map((m, i) => (
             <Link
-              key={i}
+              key={m.kind + "-" + m.data.id}
               href={m.kind === "photo" ? "/album" : "/diary"}
               className="aspect-square rounded-2xl overflow-hidden glass-light glass-highlight hover:scale-105 transition-transform relative group"
             >

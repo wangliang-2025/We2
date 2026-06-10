@@ -59,7 +59,7 @@ export function AvatarPair() {
             status={theirStatus}
             statusText={profile.theirStatusText}
             locale={locale}
-            onClick={() => alert("只能改自己的头像和状态哦～对方的得让 TA 自己改")}
+            onClick={() => {}}
           />
         </div>
       </GlassCard>

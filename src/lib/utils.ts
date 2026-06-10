@@ -38,6 +38,11 @@ export function getDuration(from: Date, to: Date = new Date()): Duration {
     const prev = new Date(to.getFullYear(), to.getMonth(), 0);
     days += prev.getDate();
   }
+  while (days < 0) {
+    months -= 1;
+    const prev = new Date(to.getFullYear(), to.getMonth() + months + 1, 0);
+    days += prev.getDate();
+  }
   if (months < 0) {
     years -= 1;
     months += 12;

@@ -476,8 +476,6 @@ export const store = {
   moods: {
     list: (): MoodEntry[] => cache.moods,
     set: (date: string, patch: Partial<Omit<MoodEntry, "date">>) => {
-      const moodVal =
-        cache.me?.role === "you" ? patch.yourMood : patch.theirMood;
       const idx = cache.moods.findIndex((m) => m.date === date);
       if (idx >= 0) {
         cache.moods[idx] = { ...cache.moods[idx], ...patch };
@@ -487,7 +485,8 @@ export const store = {
       emit();
       withSync(() =>
         api.setMood(date, {
-          mood: moodVal,
+          yourMood: patch.yourMood,
+          theirMood: patch.theirMood,
           note: patch.note,
         }) as Promise<unknown>
       );

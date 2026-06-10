@@ -86,7 +86,10 @@ export default function AlbumPage() {
         accept="image/*"
         multiple
         hidden
-        onChange={(e) => handleFiles(e.target.files)}
+        onChange={(e) => {
+          handleFiles(e.target.files);
+          if (e.target) e.target.value = "";
+        }}
       />
 
       <ViewSwitcher value={view} onChange={setView} />

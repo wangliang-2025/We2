@@ -196,6 +196,7 @@ function MessageBubble({ m }: { m: Message }) {
 function BottleModal({ onClose, onPicked }: { onClose: () => void; onPicked: (b: Bottle) => void }) {
   const { t } = useI18n();
   const [text, setText] = useState("");
+  const [picking, setPicking] = useState(false);
   const throwBottle = () => {
     if (!text.trim()) return;
     store.bottles.add(text.trim());
@@ -203,10 +204,15 @@ function BottleModal({ onClose, onPicked }: { onClose: () => void; onPicked: (b:
     onClose();
   };
   const pick = async () => {
-    const b = await store.bottles.pickRandom();
-    if (b) onPicked(b);
-    else alert(t("chat.noBottle"));
-    onClose();
+    if (picking) return;
+    setPicking(true);
+    try {
+      const b = await store.bottles.pickRandom();
+      if (b) onPicked(b);
+      else alert(t("chat.noBottle"));
+    } finally {
+      onClose();
+    }
   };
 
   return (
@@ -215,7 +221,7 @@ function BottleModal({ onClose, onPicked }: { onClose: () => void; onPicked: (b:
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4"
-      onClick={onClose}
+      onClick={picking ? undefined : onClose}
     >
       <motion.div
         initial={{ scale: 0.9 }}

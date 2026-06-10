@@ -156,7 +156,7 @@ export const api = {
 
   // ===== Moods =====
   listMoods: () => request<unknown[]>("/api/moods"),
-  setMood: (date: string, patch: { mood?: number; note?: string }) =>
+  setMood: (date: string, patch: { mood?: number; yourMood?: number; theirMood?: number; note?: string }) =>
     request<unknown>("/api/moods", {
       method: "POST",
       body: JSON.stringify({ date, ...patch }),

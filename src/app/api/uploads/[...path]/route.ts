@@ -3,7 +3,7 @@ import { readFile } from "fs/promises";
 import path from "path";
 import { getCurrentUser } from "@/lib/auth";
 
-const UPLOAD_DIR = process.env.UPLOAD_DIR || "./uploads";
+const UPLOAD_DIR = path.resolve(process.env.UPLOAD_DIR || "./uploads");
 
 const TYPE_MAP: Record<string, string> = {
   ".webp": "image/webp",
@@ -23,14 +23,17 @@ export async function GET(_: NextRequest, { params }: { params: { path: string[]
   const [coupleId, ...rest] = segments;
   if (coupleId !== me.coupleId) return new NextResponse("无权访问", { status: 403 });
 
-  // 防御路径穿越
   const safeRel = path.posix.join(coupleId, ...rest).replace(/\\/g, "/");
   if (safeRel.includes("..")) return new NextResponse("非法路径", { status: 400 });
 
   const fullPath = path.join(UPLOAD_DIR, safeRel);
+  const resolved = path.resolve(fullPath);
+  if (!resolved.startsWith(UPLOAD_DIR + path.sep) && resolved !== UPLOAD_DIR) {
+    return new NextResponse("非法路径", { status: 400 });
+  }
   try {
-    const data = await readFile(fullPath);
-    const ext = path.extname(fullPath).toLowerCase();
+    const data = await readFile(resolved);
+    const ext = path.extname(resolved).toLowerCase();
     const contentType = TYPE_MAP[ext] || "application/octet-stream";
     return new NextResponse(data, {
       headers: {

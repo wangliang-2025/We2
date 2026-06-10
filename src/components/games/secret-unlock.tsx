@@ -65,11 +65,11 @@ export function SecretUnlock() {
           >
             <div className="text-6xl mb-4 animate-heart-beat">💖</div>
             <p className="font-bold text-lg text-gradient-warm">{t("games.secretRight")}</p>
-            <p className="text-sm opacity-70 mt-2">永远爱你</p>
+            <p className="text-sm opacity-70 mt-2">{t("games.secretOpen")}</p>
           </motion.div>
         ) : !secret ? (
           <motion.div key="no-secret" className="text-sm opacity-60 py-4 text-center">
-            先去 设置 → 暗号 设置一个吧
+            {t("games.secretNoSecret")}
           </motion.div>
         ) : (
           <motion.div

@@ -57,8 +57,8 @@ export async function pushToServerChan(
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
-        title: title.slice(0, 32), // Server酱 title 上限
-        desp: desp.slice(0, 32 * 1024), // desp 上限 32KB
+        title: [...title].slice(0, 32).join(""),
+        desp: desp.slice(0, 32 * 1024),
       }),
     });
     const json = await res.json().catch(() => ({}));
@@ -114,7 +114,7 @@ export async function sendNotificationToPartner(
       "",
       payload.url ? `[前往查看](${payload.url})` : "",
       "",
-      `*来自 我们的小屋 · ${new Date().toLocaleString("zh-CN")}*`,
+      `*来自 我们的小屋 · ${new Date().toLocaleString()}*`,
     ]
       .filter(Boolean)
       .join("\n");

@@ -20,6 +20,13 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-CN" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("ld_theme");if(!t)t="auto";var d="light";if(t==="dark")d="dark";else if(t==="auto"&&window.matchMedia("(prefers-color-scheme: dark)").matches)d="dark";document.documentElement.dataset.theme=d}catch(e){}})()`,
+          }}
+        />
+      </head>
       <body>
         <ThemeProvider>
           <I18nProvider>

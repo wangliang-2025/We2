@@ -244,6 +244,8 @@ export const en: Dict = {
     secretInput: "Type secret...",
     secretWrong: "Wrong code",
     secretRight: "Correct! Surprise unlocked",
+    secretOpen: "Love you forever",
+    secretNoSecret: "Go to Settings → Secret to set one first",
   },
   common: {
     save: "Save",

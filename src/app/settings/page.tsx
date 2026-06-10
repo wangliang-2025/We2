@@ -91,8 +91,9 @@ export default function SettingsPage() {
           <Field label={t("settings.theirName")}>
             <input
               value={profile.theirName}
-              onChange={(e) => update({ theirName: e.target.value })}
-              className="input-glass"
+              readOnly
+              className="input-glass opacity-60 cursor-not-allowed"
+              title="对方的名字只能由 TA 自己修改"
             />
           </Field>
         </div>

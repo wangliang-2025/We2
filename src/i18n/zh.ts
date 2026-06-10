@@ -242,6 +242,8 @@ export const zh = {
     secretInput: "输入暗号...",
     secretWrong: "暗号不对哦",
     secretRight: "暗号正确！为你们解锁惊喜",
+    secretOpen: "永远爱你",
+    secretNoSecret: "先去 设置 → 暗号 设置一个吧",
   },
   common: {
     save: "保存",

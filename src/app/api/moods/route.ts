@@ -15,10 +15,16 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     if (!body.date) throw new ApiError(400, "日期必填");
 
-    // 一方只能改自己的字段
-    const field = me.role === "you" ? "yourMood" : "theirMood";
     const data: Record<string, unknown> = {};
-    if ("mood" in body) data[field] = body.mood;
+    if ("mood" in body && body.mood != null) {
+      data[me.role === "you" ? "yourMood" : "theirMood"] = body.mood;
+    }
+    if ("yourMood" in body && body.yourMood != null) {
+      data.yourMood = body.yourMood;
+    }
+    if ("theirMood" in body && body.theirMood != null) {
+      data.theirMood = body.theirMood;
+    }
     if ("note" in body) data.note = body.note;
 
     const existing = await prisma.mood.findUnique({

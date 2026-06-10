@@ -16,18 +16,22 @@ function nextOccurrence(a: Anniversary): Date {
   today.setHours(0, 0, 0, 0);
   const parts = a.date.split("-").map(Number);
   const orig = new Date(parts[0], (parts[1] || 1) - 1, parts[2] || 1);
+  if (isNaN(orig.getTime())) return today;
   if (!a.repeat) return orig;
   const next = new Date(today.getFullYear(), orig.getMonth(), orig.getDate());
-  if (next.getTime() < today.getTime()) {
+  if (isNaN(next.getTime()) || next.getTime() < today.getTime()) {
     next.setFullYear(today.getFullYear() + 1);
   }
+  if (isNaN(next.getTime())) return today;
   return next;
 }
 
 function daysBetween(target: Date) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  return Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  const t = new Date(target.getTime());
+  t.setHours(0, 0, 0, 0);
+  return Math.round((t.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 export default function AnniversaryPage() {

@@ -26,16 +26,21 @@ export function DrawBoard() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     const dpr = window.devicePixelRatio || 1;
+    let resizeId = 0;
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
       const saved = canvas.toDataURL();
+      const currentId = ++resizeId;
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
       ctx.scale(dpr, dpr);
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
       const img = new Image();
-      img.onload = () => ctx.drawImage(img, 0, 0);
+      img.onload = () => {
+        if (currentId !== resizeId) return;
+        ctx.drawImage(img, 0, 0);
+      };
       img.src = saved;
     };
     resize();
